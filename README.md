@@ -19,3 +19,5 @@ Note:
 
 * The starter project was created in Unity 6000.0.37f1. Please use the same Unity version for your submission.
 * Please do not edit the contents of the .gitignore file.
+
+TEST
