@@ -260,7 +260,7 @@ MonoBehaviour:
   pathLength: 100
   roadRadius: 1
   straightChance: 0.894
-  numberOfBuildings: 10
+  numberOfBuildings: 15
   buildingSize: {x: 3, y: 3}
   groundTilemap: {fileID: 232094590}
   grassTile: {fileID: 11400000, guid: 6794ed8d36c00c048b3e22d9c94a2e0e, type: 2}
@@ -470,6 +470,7 @@ GameObject:
   - component: {fileID: 1197659815}
   - component: {fileID: 1197659814}
   - component: {fileID: 1197659813}
+  - component: {fileID: 1197659816}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -520,7 +521,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 5
+  orthographic size: 12
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -551,6 +552,23 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1197659816
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1197659812}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: adaa8d81a45947240b283d9b4aa67aa0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  target: {fileID: 1854685770}
+  smoothSpeed: 0.125
+  offset: {x: 0, y: 0, z: -10}
+  minBounds: {x: -100, y: -100}
+  maxBounds: {x: 100, y: 100}
 --- !u!4 &1854685770 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6142714162631242361, guid: 8161556afc2a2974b9d7110b23cbe37c, type: 3}
