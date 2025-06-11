@@ -11,7 +11,7 @@ public class PlayerMovement : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        animator = GetComponent<Animator>(); // Get Animator component
+        animator = GetComponent<Animator>(); 
     }
 
     void Update()
@@ -20,11 +20,11 @@ public class PlayerMovement : MonoBehaviour
         movement.y = Input.GetAxisRaw("Vertical");
         movement.Normalize();
 
-        // Set animation state
+        
         bool isMoving = movement != Vector2.zero;
         animator.SetBool("isMoving", isMoving);
 
-        // Optional: Rotate sprite to movement direction
+        
         if (isMoving)
         {
             float angle = Mathf.Atan2(movement.y, movement.x) * Mathf.Rad2Deg;
