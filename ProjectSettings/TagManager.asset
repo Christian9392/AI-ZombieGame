@@ -9,6 +9,7 @@ TagManager:
   - Snake
   - Bubble
   - Life
+  - Zombie
   layers:
   - Default
   - TransparentFX
