@@ -309,6 +309,7 @@ MonoBehaviour:
   moveSpeed: 2
   attackRange: 1
   maxHealth: 100
+  bloodStainPrefab: {fileID: 1765758815204101217, guid: 7109f0fe637275444b0b96bbae82687d, type: 3}
 --- !u!95 &6497802821045497181
 Animator:
   serializedVersion: 7

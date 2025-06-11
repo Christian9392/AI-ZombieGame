@@ -14,6 +14,8 @@ public class ZombieAI : MonoBehaviour
     private Animator animator;
     private Slider healthSlider;
 
+    public GameObject bloodStainPrefab; 
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -83,6 +85,15 @@ public class ZombieAI : MonoBehaviour
     void Die()
     {
         Debug.Log(gameObject.name + " died!");
-        Destroy(gameObject);
+
+        if (bloodStainPrefab != null)
+        {
+            GameObject blood = Instantiate(bloodStainPrefab, transform.position, Random.rotation);
+            Destroy(blood, 6f); 
+        }
+
+        Destroy(gameObject); 
     }
+
+
 }
