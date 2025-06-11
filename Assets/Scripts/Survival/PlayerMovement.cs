@@ -9,7 +9,8 @@ public class PlayerMovement : MonoBehaviour
     private Animator animator;
 
     void Start()
-    {
+    {   
+        Time.timeScale = 1f;
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>(); 
     }
