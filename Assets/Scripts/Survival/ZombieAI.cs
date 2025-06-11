@@ -95,5 +95,16 @@ public class ZombieAI : MonoBehaviour
         Destroy(gameObject); 
     }
 
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.collider.CompareTag("Player"))
+        {
+            collision.collider.GetComponent<PlayerHealth>()?.TakeDamage(10f);
 
+            if (animator != null)
+            {
+                animator.SetTrigger("attack");
+            }
+        }
+    }
 }
