@@ -479,6 +479,10 @@ PrefabInstance:
       propertyPath: player
       value: 
       objectReference: {fileID: 1854685770}
+    - target: {fileID: 1592266811999285650, guid: 0fc013c8becf9fb47bb8cf0115ff0cdd, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1798764220047824094, guid: 0fc013c8becf9fb47bb8cf0115ff0cdd, type: 3}
       propertyPath: m_Name
       value: zombie
@@ -525,6 +529,22 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5226819843947072771, guid: 0fc013c8becf9fb47bb8cf0115ff0cdd, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6020863132000739491, guid: 0fc013c8becf9fb47bb8cf0115ff0cdd, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6415562606647576573, guid: 0fc013c8becf9fb47bb8cf0115ff0cdd, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6990904788480982947, guid: 0fc013c8becf9fb47bb8cf0115ff0cdd, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6990904788480982947, guid: 0fc013c8becf9fb47bb8cf0115ff0cdd, type: 3}
+      propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
