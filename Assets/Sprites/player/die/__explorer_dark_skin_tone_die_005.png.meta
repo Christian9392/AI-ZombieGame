@@ -134,7 +134,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      __explorer_dark_skin_tone_die_005_0: 5863042857620832754
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

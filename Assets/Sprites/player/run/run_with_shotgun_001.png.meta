@@ -134,7 +134,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      run_with_shotgun_001_0: -3365141399361848392
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
