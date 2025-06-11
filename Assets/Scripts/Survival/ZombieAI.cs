@@ -30,7 +30,7 @@ public class ZombieAI : MonoBehaviour
             }
         }
 
-        healthSlider = transform.Find("HealthBar")?.GetComponent<Slider>();
+        healthSlider = GetComponentInChildren<Slider>();
         if (healthSlider != null)
         {
             healthSlider.maxValue = maxHealth;
