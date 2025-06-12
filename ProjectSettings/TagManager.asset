@@ -19,8 +19,8 @@ TagManager:
   - UI
   - Obstacle
   - Slow
-  - 
-  - 
+  - Floor
+  - Wall
   - 
   - 
   - 
@@ -46,6 +46,12 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Floor
+    uniqueID: 2476569791
+    locked: 0
+  - name: Walls
+    uniqueID: 12686611
     locked: 0
   m_RenderingLayers:
   - Default
