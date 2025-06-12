@@ -64,6 +64,10 @@ sysinfo.txt
 *.unitypackage
 *.app
 
+# ML-Agents training outputs
+results/
+*.onnx
+
 # Crashlytics generated file
 crashlytics-build.properties
 

@@ -14,6 +14,7 @@ public class Bullet : MonoBehaviour
         if (other.CompareTag("Zombie"))
         {
             other.GetComponent<ZombieAI>()?.TakeDamage(20f);
+            other.GetComponent<ZombieAgent>()?.TakeDamage(20f);
             Destroy(gameObject); 
         }
     }
