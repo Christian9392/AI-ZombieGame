@@ -1,11 +1,13 @@
 using UnityEngine;
 using System.Collections.Generic;
+using TMPro;
 
 public class ZombieSpawner : MonoBehaviour
 {
     public GameObject zombiePrefab;
     public int zombiesPerWave = 4;
     public float timeBetweenWaves = 10f;
+    public int maxZombies = 50;
 
     public Vector2 spawnAreaMin = new Vector2(-10f, -10f);
     public Vector2 spawnAreaMax = new Vector2(10f, 10f);
@@ -14,8 +16,12 @@ public class ZombieSpawner : MonoBehaviour
     private float waveTimer = 0f;
     private int currentWave = 1;
 
+    public TMP_Text waveText;
+    public TMP_Text countdownText;
+
     void Start()
     {
+        UpdateWaveUI();
         SpawnZombies(zombiesPerWave);
     }
 
@@ -25,13 +31,32 @@ public class ZombieSpawner : MonoBehaviour
 
         waveTimer += Time.deltaTime;
 
+        UpdateCountdownUI(Mathf.Max(0, timeBetweenWaves - waveTimer));
+
         if (waveTimer >= timeBetweenWaves)
         {
             waveTimer = 0f;
             currentWave++;
-            zombiesPerWave += 2;
+            UpdateWaveUI();
             Debug.Log($"Wave {currentWave}! Spawning {zombiesPerWave} zombies.");
             SpawnZombies(zombiesPerWave);
+        }
+    }
+
+    void UpdateWaveUI()
+    {
+        if (waveText != null)
+        {
+            waveText.text = $"Wave {currentWave}";
+        }
+    }
+
+    void UpdateCountdownUI(float secondsLeft)
+    {
+        if (countdownText != null)
+        {
+            int rounded = Mathf.CeilToInt(secondsLeft);
+            countdownText.text = $"Next wave in: {rounded}s";
         }
     }
 
@@ -75,10 +100,13 @@ public class ZombieSpawner : MonoBehaviour
             }
         }
 
+        int zombiesAllowed = Mathf.Min(totalToSpawn, maxZombies - spawnedZombies.Count);
+        if (zombiesAllowed <= 0) return;
+
         // Spawn per zone
-        for (int zone = 0; zone < 4; zone++)
+        for (int zone = 0; zone < 4 && zombiesAllowed > 0; zone++)
         {
-            for (int i = 0; i < distribution[zone]; i++)
+            for (int i = 0; i < distribution[zone] && zombiesAllowed > 0; i++, zombiesAllowed--)
             {
                 Vector2 min = corners[zone, 0];
                 Vector2 max = corners[zone, 1];
