@@ -1,209 +1,378 @@
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using System.Collections.Generic;
+using System; 
 
 public class RoadGeneratorV2 : MonoBehaviour
-{
+{   
     [Header("Map Settings")]
-    public int width = 100;
-    public int height = 100;
-    [Range(0.1f, 100f)] // Allow scaling from smaller than 1 unit to 100 units per tile
-    public float mapScale = 1f; // <--- NEW: Scale factor for the entire map
+    public int mapWidth = 100;
+    public int mapHeight = 100;
+    [Range(0.1f, 100f)]
+    public float mapScale = 1f;
 
-    [Header("Road Generation")]
-    public int numberOfRoads = 5;
-    public int pathLength = 100;
-    public int roadRadius = 1;
-    [Range(0f, 1f)] public float straightChance = 0.7f;
+    [Header("A* Road Generation")]
+    public int numRoads = 50; 
+    public int initialRoadLength = 5; 
+    public float gCostMultiplier = 1f; 
 
     [Header("Tile References")]
     public Tilemap roadTilemap;
     public TileBase fillerTile;
     public TileBase[] roadTiles;
 
-    [Header("Seed")]
-    public int seed;
-    private bool useRandomSeed = true;
 
-    // Map data: 0 = filler, 1 = road
+    // mapData where 0 = filler tiles, 1 = road tiles
     private int[,] mapData;
 
-    void Start()
-    {
-        if (seed == 0)
+    // store all pathNodes
+    private PathNode[,] pathNodes;
+
+    // Node class
+    private class PathNode : IHeapItem<PathNode>
+    {       
+        public Vector2Int position;
+        public int gridX; 
+        public int gridY;
+
+        public PathNode parent;
+
+        public int gCost; 
+        public int hCost; 
+        public int fCost { get { return gCost + hCost; } }
+
+        int heapIndex;
+        public int HeapIndex
         {
-            seed = Random.Range(int.MinValue, int.MaxValue);
-            useRandomSeed = true;
+            get { return heapIndex; }
+            set { heapIndex = value; }
         }
-        Random.InitState(seed);
 
-        GenerateMap();
-        GenerateRoads();
-        RenderMap();
-    }
-
-    [ContextMenu("Generate New Map")]
-    void EditorGenerateMap()
-    {
-        if (useRandomSeed)
+        // Constructor
+        public PathNode(Vector2Int pos, int x, int y)
         {
-            seed = Random.Range(int.MinValue, int.MaxValue);
+            position = pos;
+            gridX = x;
+            gridY = y;
+
+            parent = null;
+            gCost = 0;
+            hCost = 0;
+            heapIndex = 0; 
         }
-        Random.InitState(seed);
 
-        GenerateMap();
-        GenerateRoads();
-        RenderMap();
-    }
-
-    void GenerateMap()
-    {
-        mapData = new int[width, height];
-        for (int x = 0; x < width; x++)
-            for (int y = 0; y < height; y++)
-                mapData[x, y] = 0;
-    }
-
-    void GenerateRoads()
-    {
-        for (int i = 0; i < numberOfRoads; i++)
+        public int CompareTo(PathNode other)
         {
-            Vector2Int startPos = new Vector2Int(
-                Random.Range(roadRadius + 1, width - roadRadius - 1),
-                Random.Range(roadRadius + 1, height - roadRadius - 1)
-            );
-            Vector2Int dir = GetRandomDirection();
-
-            CarveRoad(startPos, dir, pathLength);
-        }
-    }
-
-    void CarveRoad(Vector2Int pos, Vector2Int dir, int length)
-    {
-        for (int i = 0; i < length; i++)
-        {
-            SetRoadTiles(pos, roadRadius);
-
-            if (Random.value > straightChance)
-                dir = Random.value > 0.5f ? TurnLeft(dir) : TurnRight(dir);
-
-            pos += dir;
-
-            if (!IsInBoundsWithRadius(pos, roadRadius))
-                break;
-        }
-    }
-
-    void SetRoadTiles(Vector2Int center, int radius)
-    {
-        radius = Mathf.Max(0, radius); // Ensure radius is non-negative
-
-        for (int dx = -radius; dx <= radius; dx++)
-        {
-            for (int dy = -radius; dy <= radius; dy++)
+            int compare = fCost.CompareTo(other.fCost);
+            if (compare == 0)
             {
-                int tileX = center.x + dx;
-                int tileY = center.y + dy;
+                compare = hCost.CompareTo(other.hCost);
+            }
+            return -compare; 
+        }
 
-                if (tileX >= 0 && tileX < width && tileY >= 0 && tileY < height)
-                {
-                    mapData[tileX, tileY] = 1;
-                }
+        // Reset node data before each new pathfinding run
+        public void ResetNodeData()
+        {
+            gCost = 0;
+            hCost = 0;
+            parent = null;
+            heapIndex = 0; 
+        }
+    }
+
+    void Start()
+    {   
+        InitializeRandomState();
+        InitializeMap();
+        GenerateRoads();
+        RenderMap();
+    }
+
+    // Generate a random seed for the world
+    void InitializeRandomState()
+    {
+        UnityEngine.Random.InitState(UnityEngine.Random.Range(int.MinValue, int.MaxValue));
+    }
+
+    // Initialize the map with filler tiles
+    void InitializeMap()
+    {
+        mapData = new int[mapWidth, mapHeight];
+        pathNodes = new PathNode[mapWidth, mapHeight]; 
+
+        // Generate map
+        for (int x = 0; x < mapWidth; x++)
+        {
+            for (int y = 0; y < mapHeight; y++)
+            {   
+                // Set map data with filler tiles (0 is filler, 1 is road tile)
+                mapData[x, y] = 0; 
+
+                // Create new pathnode
+                pathNodes[x, y] = new PathNode(new Vector2Int(x, y), x, y); 
             }
         }
     }
 
-    void RenderMap()
-    {
-        roadTilemap.ClearAllTiles();
+    // Generate the road
+    void GenerateRoads()
+    {    
+        // Generate a random start road for A* to work
+        CreateInitialRoad();
 
-        // <--- NEW: Apply the map scale to the Tilemap GameObject's transform ---
+        for (int i = 0; i < numRoads; i++) {
+            Vector2Int startPoint = GetRandomUnroadedTile();
+            if (startPoint == Vector2Int.left * 999)
+            {
+                break;
+            }
+
+            List<Vector2Int> path = FindPathAStarToAnyRoad(startPoint);
+            if (path != null && path.Count > 0)
+            {
+                AddPathToMapData(path);
+            }
+        }
+    }
+
+    // Generates an initial road
+    void CreateInitialRoad()
+    {
+        Vector2Int startPos = new Vector2Int(mapWidth / 2, mapHeight / 2);
+        Vector2Int dir = GetRandomDirection();
+
+        for (int i = 0; i < initialRoadLength; i++)
+        {   
+            // If tile is not in bound, break
+            if (!IsInBounds(startPos)) {
+                break;
+            }
+            SetRoadTile(startPos);
+            startPos += dir;
+        }
+    }
+
+    /// Finds a random tile that is currently not part of a road.
+    Vector2Int GetRandomUnroadedTile()
+    {
+        for (int i = 0; i < 100; i++)
+        {
+            int randX = UnityEngine.Random.Range(1, mapWidth - 1);
+            int randY = UnityEngine.Random.Range(1, mapHeight - 1);
+            Vector2Int pos = new Vector2Int(randX, randY);
+
+            if (!IsRoad(pos.x, pos.y))
+            {
+                return pos;
+            }
+        }
+        return Vector2Int.left * 999;
+    }
+
+    /// Adds a path to mapData
+    void AddPathToMapData(List<Vector2Int> path)
+    {
+        foreach (Vector2Int pos in path) {
+            SetRoadTile(pos);
+        }
+    }
+
+    // A* Path to find an existing road
+    List<Vector2Int> FindPathAStarToAnyRoad(Vector2Int startPos)
+    {
+        // Reset all nodes first
+        for (int x = 0; x < mapWidth; x++) {
+            for (int y = 0; y < mapHeight; y++) {
+                pathNodes[x, y].ResetNodeData();
+            }
+        }
+
+        // Create open and closed set
+        Heap<PathNode> openSet = new Heap<PathNode>(mapWidth * mapHeight);
+        HashSet<PathNode> closedSet = new HashSet<PathNode>(); 
+
+        PathNode startNode = pathNodes[startPos.x, startPos.y];
+        startNode.parent = startNode; 
+        openSet.Add(startNode);
+
+        // Stop if we have a path or run out of nodes to explore (means no path can be found!)
+        while (openSet.Count > 0)
+        {
+            PathNode currentNode = openSet.RemoveFirst();
+            closedSet.Add(currentNode);
+
+            // Check if the currentnode hits an existing road tile, if so reconstruct path and end the A* loop
+            if (IsRoad(currentNode.position.x, currentNode.position.y) && currentNode != startNode)
+            {
+                return ReconstructPath(currentNode);
+            }
+
+            // Get neighbors
+            Vector2Int[] neighbours = GetNeighbours();
+            foreach (Vector2Int neigh in neighbours)
+            {
+                Vector2Int neighborPos = currentNode.position + neigh;
+                if (!IsInBounds(neighborPos))
+                {
+                    continue;
+                }
+
+                PathNode neighborNode = pathNodes[neighborPos.x, neighborPos.y];
+
+                // Continue if neighboring node is in closed set
+                if (closedSet.Contains(neighborNode))
+                {
+                    continue;
+                }
+
+                // calculate gcost with heuristic (getdistance in thsi case)
+                int newGCost = currentNode.gCost + GetDistance(currentNode, neighborNode);
+
+                //If the neighbour is not in the open set OR
+                //the neighour was previously checked and the new G Cost is less than the previous G Cost 
+                if (!openSet.Contains(neighborNode) || newGCost < neighborNode.gCost)
+                {
+                    neighborNode.gCost = newGCost;
+                    neighborNode.parent = currentNode;
+                    neighborNode.hCost = 0; 
+
+                    if (!openSet.Contains(neighborNode))
+                    {
+                        openSet.Add(neighborNode);
+                    }
+                    else
+                    {
+                        openSet.UpdateItem(neighborNode); 
+                    }
+                }
+            }
+        }
+
+        // No path found
+        return null;
+    }
+
+    /// Reconstructs the path from the end node back to the start node.
+    List<Vector2Int> ReconstructPath(PathNode endNode)
+    {
+        List<Vector2Int> path = new List<Vector2Int>();
+        PathNode currentNode = endNode;
+
+        // stop looping when current node is the start node
+        while (currentNode != null && currentNode.parent != currentNode) 
+        {
+            path.Add(currentNode.position);
+            currentNode = currentNode.parent;
+        }
+        path.Add(currentNode.position);
+ 
+        // Reverse the path to reconstruct it from the start
+        path.Reverse();
+        return path;
+    }
+
+    // Sets a tile on the map as 1 (has a tile)
+    void SetRoadTile(Vector2Int pos)
+    {
+        if (pos.x >= 0 && pos.x < mapWidth && pos.y >= 0 && pos.y < mapHeight) {
+            mapData[pos.x, pos.y] = 1;
+        }
+    }
+
+    void RenderMap()
+    {   
+        // clear all tiles first
+        roadTilemap.ClearAllTiles();
         roadTilemap.transform.localScale = new Vector3(mapScale, mapScale, 1f);
 
-        for (int x = 0; x < width; x++)
-        {
-            for (int y = 0; y < height; y++)
-            {
+        for (int x = 0; x < mapWidth; x++) {
+            for (int y = 0; y < mapHeight; y++) {
+
+                // Generate the tiles if 1 on map data (0 is filler)
                 Vector3Int tilePos = new Vector3Int(x, y, 0);
-                if (mapData[x, y] == 1)
-                {
+                if (mapData[x, y] == 1) {
                     int index = GetRoadTileIndex(x, y);
                     roadTilemap.SetTile(tilePos, roadTiles[index]);
                 }
-                else
-                {
+                else {
                     roadTilemap.SetTile(tilePos, fillerTile);
                 }
             }
         }
     }
 
+    // Checks the current road tile (eg if its intersection, horizontal vertical etc)
     int GetRoadTileIndex(int currX, int currY)
-    {
+    {    
+        // Check all directions if road exists
         bool up = IsRoad(currX, currY + 1);
         bool down = IsRoad(currX, currY - 1);
         bool left = IsRoad(currX - 1, currY);
         bool right = IsRoad(currX + 1, currY);
 
-        // 4-way Intersection
+        // 4 way intersection
         if (up && down && left && right) return 10;
-
-        // T-Junctions
-        if (down && left && right && !up) return 6;
-        if (up && left && right && !down) return 7;
-        if (up && down && right && !left) return 8;
-        if (up && down && left && !right) return 9;
-
-        // Straights
+        // T-down
+        if (down && left && right && !up) return 7;
+        // T-Up
+        if (up && left && right && !down) return 6;
+        //T-Left
+        if (up && down && right && !left) return 9;
+        //T-right
+        if (up && down && left && !right) return 8;
+        // Horizontal
         if (left && right && !up && !down) return 0;
+        // Vertical
         if (up && down && !left && !right) return 1;
-
-        // Corners
+        // Corner TL
         if (up && left && !down && !right) return 2;
+        // Corner TR
         if (up && right && !down && !left) return 3;
+        // Corner BL
         if (down && left && !up && !right) return 4;
+        // Corner BR
         if (down && right && !up && !left) return 5;
 
-        // Dead End / Isolated Road
-        return 11;
+        // No roads (filler tile)
+        return 11; 
     }
 
+    // Checks if a given tile coordinate is within map bounds and its a road on mapData
     bool IsRoad(int x, int y)
     {
-        return x >= 0 && x < width && y >= 0 && y < height && mapData[x, y] == 1;
+        return x >= 0 && x < mapWidth && y >= 0 && y < mapHeight && mapData[x, y] == 1;
     }
 
+    // returns a random direction
     Vector2Int GetRandomDirection()
     {
         Vector2Int[] directions = { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right };
-        return directions[Random.Range(0, directions.Length)];
+        return directions[UnityEngine.Random.Range(0, directions.Length)];
     }
 
-    Vector2Int TurnLeft(Vector2Int dir)
-    {
-        if (dir == Vector2Int.up) return Vector2Int.left;
-        if (dir == Vector2Int.left) return Vector2Int.down;
-        if (dir == Vector2Int.down) return Vector2Int.right;
-        if (dir == Vector2Int.right) return Vector2Int.up;
-        return dir;
-    }
-
-    Vector2Int TurnRight(Vector2Int dir)
-    {
-        if (dir == Vector2Int.up) return Vector2Int.right;
-        if (dir == Vector2Int.right) return Vector2Int.down;
-        if (dir == Vector2Int.down) return Vector2Int.left;
-        if (dir == Vector2Int.left) return Vector2Int.up;
-        return dir;
-    }
-
-    bool IsInBoundsWithRadius(Vector2Int pos, int radius)
-    {
-        return (pos.x - radius) >= 0 && (pos.x + radius) < width &&
-               (pos.y - radius) >= 0 && (pos.y + radius) < height;
-    }
-
+    /// Checks if a single tile position is within map bounds.
     bool IsInBounds(Vector2Int pos)
     {
-        return pos.x >= 1 && pos.x < width - 1 && pos.y >= 1 && pos.y < height - 1;
+        return pos.x >= 0 && pos.x < mapWidth && pos.y >= 0 && pos.y < mapHeight;
+    }
+
+    /// Check neighbours 
+    private Vector2Int[] GetNeighbours()
+    {
+        return new Vector2Int[] {
+            Vector2Int.up,
+            Vector2Int.down,
+            Vector2Int.left,
+            Vector2Int.right
+        };
+    }
+
+    private int GetDistance(PathNode nodeA, PathNode nodeB)
+    {       
+        int dx = Math.Abs(nodeA.gridX - nodeB.gridX);
+        int dy = Math.Abs(nodeA.gridY - nodeB.gridY);
+
+        return 10 * (dx + dy);
     }
 }

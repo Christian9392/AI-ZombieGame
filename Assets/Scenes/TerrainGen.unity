@@ -131,6 +131,7 @@ GameObject:
   - component: {fileID: 387440784}
   - component: {fileID: 387440783}
   - component: {fileID: 387440782}
+  - component: {fileID: 387440785}
   m_Layer: 0
   m_Name: GroundTileMap
   m_TagString: Untagged
@@ -160,31 +161,23 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 387440780}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 58f8eea1c3da47044a791be3ed31781a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  width: 100
-  height: 100
-  numberOfRoads: 10
-  pathLength: 50
-  straightChance: 1
-  roadTilemap: {fileID: 387440784}
-  fillerTile: {fileID: 11400000, guid: cfecd735aefa58941a31268774c997e1, type: 2}
-  roadTiles:
-  - {fileID: 11400000, guid: 95d411c0c8dec3c46b4b0827fc42a32b, type: 2}
-  - {fileID: 11400000, guid: 77238593595fd244da8bdbf59bee4edd, type: 2}
-  - {fileID: 11400000, guid: 3f6115be2d2fb6f4783d3fbe4a006b8a, type: 2}
-  - {fileID: 11400000, guid: a298d4ef06f25fb43a01c9ef3eeb5962, type: 2}
-  - {fileID: 11400000, guid: 013b9ba5af070a04cb6e27de9dd168fb, type: 2}
-  - {fileID: 11400000, guid: 80d0054b0e5514d47950ad6de41b35e1, type: 2}
-  - {fileID: 11400000, guid: 134906e7d8c7bf5488d4da9b3b70f9ec, type: 2}
-  - {fileID: 11400000, guid: c907921608011af4b98dbbe3dfbd8928, type: 2}
-  - {fileID: 11400000, guid: 876c7911a23d2b6489fe79b902fbcc6e, type: 2}
-  - {fileID: 11400000, guid: dfecb6b6c929dad41ac0b064866efe03, type: 2}
-  - {fileID: 11400000, guid: 941ecc941654efe4f8c4775848d45ead, type: 2}
-  - {fileID: 11400000, guid: cfecd735aefa58941a31268774c997e1, type: 2}
+  width: 150
+  height: 150
+  numberOfRoads: 20
+  pathLength: 80
+  roadRadius: 1
+  straightChance: 0.847
+  numberOfBuildings: 20
+  buildingSize: {x: 3, y: 3}
+  groundTilemap: {fileID: 387440784}
+  grassTile: {fileID: 11400000, guid: 6794ed8d36c00c048b3e22d9c94a2e0e, type: 2}
+  roadTile: {fileID: 11400000, guid: ffc0a30f418a9834ba6dd60d2af51903, type: 2}
+  buildingTile: {fileID: 11400000, guid: 5f3c8f7ed5f191143ba4c7545521fc76, type: 2}
   seed: 0
 --- !u!483693784 &387440783
 TilemapRenderer:
@@ -300,6 +293,39 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
+--- !u!114 &387440785
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 387440780}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 38734113674a4af4d898811e55b64911, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  width: 20
+  height: 20
+  mapScale: 17
+  numberOfRoadsToConnect: 20
+  initialRoadSeedLength: 20
+  roadTilemap: {fileID: 387440784}
+  fillerTile: {fileID: 11400000, guid: cfecd735aefa58941a31268774c997e1, type: 2}
+  roadTiles:
+  - {fileID: 11400000, guid: 95d411c0c8dec3c46b4b0827fc42a32b, type: 2}
+  - {fileID: 11400000, guid: 77238593595fd244da8bdbf59bee4edd, type: 2}
+  - {fileID: 11400000, guid: 3f6115be2d2fb6f4783d3fbe4a006b8a, type: 2}
+  - {fileID: 11400000, guid: a298d4ef06f25fb43a01c9ef3eeb5962, type: 2}
+  - {fileID: 11400000, guid: 013b9ba5af070a04cb6e27de9dd168fb, type: 2}
+  - {fileID: 11400000, guid: 80d0054b0e5514d47950ad6de41b35e1, type: 2}
+  - {fileID: 11400000, guid: 134906e7d8c7bf5488d4da9b3b70f9ec, type: 2}
+  - {fileID: 11400000, guid: c907921608011af4b98dbbe3dfbd8928, type: 2}
+  - {fileID: 11400000, guid: 876c7911a23d2b6489fe79b902fbcc6e, type: 2}
+  - {fileID: 11400000, guid: dfecb6b6c929dad41ac0b064866efe03, type: 2}
+  - {fileID: 11400000, guid: 941ecc941654efe4f8c4775848d45ead, type: 2}
+  - {fileID: 11400000, guid: cfecd735aefa58941a31268774c997e1, type: 2}
+  seed: 0
 --- !u!1 &1332684780
 GameObject:
   m_ObjectHideFlags: 0
@@ -379,7 +405,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 12
+  orthographic size: 30
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
