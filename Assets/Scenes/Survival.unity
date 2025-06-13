@@ -267,11 +267,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 120826829}
   m_CullTransparentMesh: 1
---- !u!1 &175228201 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 7380330357266209439, guid: a722e6203ab4ee64aa8814cc545d33ec, type: 3}
-  m_PrefabInstance: {fileID: 2892432520291184164}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &185286230
 GameObject:
   m_ObjectHideFlags: 0
@@ -1051,7 +1046,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   zombiePrefab: {fileID: 1560440021796852142, guid: f212d71744d0a754e8665208c8c2d583, type: 3}
-  bruteZombiePrefab: {fileID: 175228201}
+  bruteZombiePrefab: {fileID: 7380330357266209439, guid: a722e6203ab4ee64aa8814cc545d33ec, type: 3}
   zombiesPerWave: 4
   timeBetweenWaves: 10
   maxZombies: 50
@@ -1855,7 +1850,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8509556469143243300, guid: a3ffd522642ca2d4db46c8d84978e74a, type: 3}
       propertyPath: maxHealth
-      value: 100000
+      value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 8509556469143243300, guid: a3ffd522642ca2d4db46c8d84978e74a, type: 3}
       propertyPath: healthBarSlider

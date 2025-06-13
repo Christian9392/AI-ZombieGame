@@ -15,9 +15,8 @@ public class Bullet : MonoBehaviour
 
             other.GetComponent<ZombieAI>()?.TakeDamage(20f);
             other.GetComponent<ZombieAgent>()?.TakeDamage(20f);
-
             other.GetComponent<BruteZombieAgent>()?.TakeDamage(20f);
-            Destroy(gameObject);       
+            Destroy(gameObject);
         }
     }
 }
