@@ -12,10 +12,7 @@ GameObject:
   - component: {fileID: 9046236721067895825}
   - component: {fileID: 5598956123379226848}
   - component: {fileID: 6279160404059883983}
-  - component: {fileID: 3256742723116124254}
   - component: {fileID: 542514131748715252}
-  - component: {fileID: 4881254806066687347}
-  - component: {fileID: 7625712116962290256}
   - component: {fileID: 3199103625921143110}
   - component: {fileID: 2365065509252151212}
   m_Layer: 0
@@ -130,7 +127,7 @@ PolygonCollider2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3818708214072970539}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Density: 1
   m_Material: {fileID: 0}
@@ -271,19 +268,6 @@ PolygonCollider2D:
       - {x: -0.465, y: -0.385}
       - {x: -0.465, y: -0.375}
   m_UseDelaunayMesh: 0
---- !u!114 &3256742723116124254
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3818708214072970539}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 79c68458450476c4ebbb6d9a7a9abfbc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  moveSpeed: 8
 --- !u!95 &542514131748715252
 Animator:
   serializedVersion: 7
@@ -306,36 +290,6 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &4881254806066687347
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3818708214072970539}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 65dfc7d132664534180a677697662a07, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  bulletPrefab: {fileID: 6721958132187195355, guid: 34f3cc05fae9c7947929e29c92cfc9ba, type: 3}
-  firePoint: {fileID: 2461775741467755968}
-  bulletSpeed: 20
---- !u!114 &7625712116962290256
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3818708214072970539}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 21b9b87496a073a4abedebcd2079c45e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  maxHealth: 100000
-  healthBarSlider: {fileID: 0}
-  gameOverTextObject: {fileID: 0}
 --- !u!114 &3199103625921143110
 MonoBehaviour:
   m_ObjectHideFlags: 0
