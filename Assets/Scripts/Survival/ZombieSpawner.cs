@@ -6,6 +6,7 @@ public class ZombieSpawner : MonoBehaviour
 {
     // Controls the zombie spawning behavior
     public GameObject zombiePrefab;
+    public GameObject bruteZombiePrefab; // New BruteZombie prefab
     public int zombiesPerWave = 4;
     public float timeBetweenWaves = 10f;
     public int maxZombies = 50;
@@ -23,7 +24,7 @@ public class ZombieSpawner : MonoBehaviour
     void Start()
     {
         UpdateWaveUI();
-        SpawnZombies(zombiesPerWave);
+        SpawnZombies(zombiesPerWave - 1, true); // Start the first wave, spawn 1 BruteZombie and 3 regular zombies
     }
 
     // Update is called once per frame
@@ -41,8 +42,8 @@ public class ZombieSpawner : MonoBehaviour
             waveTimer = 0f;
             currentWave++;
             UpdateWaveUI();
-            Debug.Log($"Wave {currentWave}! Spawning {zombiesPerWave} zombies.");
-            SpawnZombies(zombiesPerWave);
+            Debug.Log($"Wave {currentWave}! Spawning 1 BruteZombie and {zombiesPerWave - 1} regular zombies.");
+            SpawnZombies(zombiesPerWave - 1, true); // Spawn 1 BruteZombie and the rest regular zombies
         }
     }
 
@@ -71,12 +72,12 @@ public class ZombieSpawner : MonoBehaviour
         spawnedZombies.RemoveAll(z => z == null || z.Equals(null));
     }
 
-    // Spawn a specified number of zombies, ensuring they are well‐spaced
-    void SpawnZombies(int totalToSpawn)
+    // Spawn zombies, ensuring that 1 BruteZombie spawns each wave
+    void SpawnZombies(int regularZombiesCount, bool spawnBruteZombie = false)
     {
-        if (zombiePrefab == null)
+        if (zombiePrefab == null || bruteZombiePrefab == null)
         {
-            Debug.LogError("zombiePrefab is NULL! Assign it in the Inspector.");
+            Debug.LogError("Zombie prefabs are NULL! Assign them in the Inspector.");
             return;
         }
 
@@ -85,7 +86,7 @@ public class ZombieSpawner : MonoBehaviour
         int attempts = 0;
 
         // Validate spawn area
-        while (spawnedCount < totalToSpawn && attempts < totalToSpawn * maxAttemptsPerZombie)
+        while (spawnedCount < regularZombiesCount + (spawnBruteZombie ? 1 : 0) && attempts < (regularZombiesCount + (spawnBruteZombie ? 1 : 0)) * maxAttemptsPerZombie)
         {
             attempts++;
 
@@ -123,16 +124,27 @@ public class ZombieSpawner : MonoBehaviour
             spawnedCount++;
         }
 
-        if (spawnedCount < totalToSpawn)
+        if (spawnedCount < regularZombiesCount + (spawnBruteZombie ? 1 : 0))
         {
-            Debug.LogWarning($"ZombieSpawner: only found {spawnedCount}/{totalToSpawn} positions after {attempts} attempts.");
+            Debug.LogWarning($"ZombieSpawner: only found {spawnedCount}/{regularZombiesCount + (spawnBruteZombie ? 1 : 0)} positions after {attempts} attempts.");
         }
 
         // Instantiate zombies at the valid positions
         foreach (var pos in newPositions)
         {
-            var go = Instantiate(zombiePrefab, pos, Quaternion.identity);
-            spawnedZombies.Add(go);
+            if (spawnBruteZombie)
+            {
+                // Spawn the BruteZombie at the first position
+                var go = Instantiate(bruteZombiePrefab, pos, Quaternion.identity);
+                spawnedZombies.Add(go);
+                spawnBruteZombie = false; // Only spawn one BruteZombie per wave
+            }
+            else
+            {
+                // Spawn regular zombies
+                var go = Instantiate(zombiePrefab, pos, Quaternion.identity);
+                spawnedZombies.Add(go);
+            }
         }
     }
 }
