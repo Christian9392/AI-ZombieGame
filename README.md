@@ -3,7 +3,8 @@
 
 **Student1 ID:** \*\*\*s3968971\*\*\* <br>
 **Student1 Name:** \*\*\*Paul Johny Mampilly\*\*\* <br>
-**Student1 Contribution:**\*\*\*Please summarize your contribution here\*\*\* <br>
+**Student1 Contribution:**\*\*\*Developed player movement, shooting, health bar, and death animation logic,Implemented and trained `PlayerAgent` using Unity ML-Agents PPO algorithm, Created and tuned `PlayerBehaviour` YAML config for ML training, Built helper AI logic that detects zombies, rotates, and shoots autonomously, Wrote `AIHelperSpawner.cs` to spawn a helper when player presses space, lasting 5 seconds, Integrated helper into the gameplay loop and ensured only one is active at a time.
+\*\*\* <br>
 
 **Student2 ID:** \*\*\*s3918525\*\*\* <br>
 **Student2 Name:** \*\*\*Philip Kim\*\*\* <br>
@@ -28,11 +29,15 @@ Instructions:
 Saved models:
 - ZombieBrain.onnx zombie trained file in /Assets
 - BruteZombieBrain.onnx brute zombie trained file in /Assets
+- PlayerBehaviour.onx trained file in /Assets
 
 <br>
 Description of Contributions and Commit ID:
 Paul
--
+- Player movement and animation system: CommitIDs (60e592a, 6f9825e)
+- Shooting mechanics : CommitIDs (d9e6031)
+- Health and death system: CommitID (eaa2e24, f3535b1)
+- AI helper training, AI spawning system and YAML training configuration: CommitIDs (d15313d, 35a7539)
 
 Philip
 - Wave-based zombie spawner: CommitIDs (24320f7, e238c8a)
