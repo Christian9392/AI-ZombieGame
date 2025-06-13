@@ -10,6 +10,7 @@ TagManager:
   - Bubble
   - Life
   - Zombie
+  - Helper
   layers:
   - Default
   - TransparentFX
