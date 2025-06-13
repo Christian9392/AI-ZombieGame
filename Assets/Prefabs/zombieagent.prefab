@@ -117,7 +117,7 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 0
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 0}
+  m_Model: {fileID: 5022602860645237092, guid: bdbbd74ed8115a047ae06d87c88c4a51, type: 3}
   m_InferenceDevice: 0
   m_BehaviorType: 0
   m_BehaviorName: ZombieBrain
@@ -173,7 +173,10 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
-  speed: 3
+  speed: 5
+  turnSpeed: 10
+  maxHealth: 100
+  bloodStainPrefab: {fileID: 1765758815204101217, guid: 7109f0fe637275444b0b96bbae82687d, type: 3}
   spawnRangeX: {x: -6, y: 6}
   spawnRangeY: {x: -3, y: 3}
   player: {fileID: 0}

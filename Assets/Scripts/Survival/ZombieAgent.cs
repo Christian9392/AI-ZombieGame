@@ -7,8 +7,8 @@ using UnityEngine.UI;
 public class ZombieAgent : Unity.MLAgents.Agent
 {
     [Header("Agent Movement")]
-    [Tooltip("Top-down movement speed")]
-    public float speed = 20f;
+    public float speed = 5f;
+    public float turnSpeed = 10f;
 
     [Header("Health Settings")]
     public float maxHealth = 100f;
@@ -19,12 +19,10 @@ public class ZombieAgent : Unity.MLAgents.Agent
     public GameObject bloodStainPrefab;
 
     [Header("Episode Settings")]
-    [Tooltip("How far from center to spawn")]
     public Vector2 spawnRangeX = new Vector2(-6f, 6f);
     public Vector2 spawnRangeY = new Vector2(-3f, 3f);
 
     [Header("References (optional)")]
-    [Tooltip("If unassigned, will find by tag \"Player\"")]
     public Transform player;
 
     Rigidbody2D rb;
@@ -36,8 +34,9 @@ public class ZombieAgent : Unity.MLAgents.Agent
         animator = GetComponent<Animator>();
         sr = GetComponent<SpriteRenderer>();
         // Force kinematic for MovePosition
-        rb.bodyType = RigidbodyType2D.Kinematic;
+        rb.bodyType = RigidbodyType2D.Dynamic;
         rb.gravityScale = 0f;
+        rb.interpolation = RigidbodyInterpolation2D.Interpolate;
 
         currentHealth = maxHealth;
 
@@ -57,24 +56,40 @@ public class ZombieAgent : Unity.MLAgents.Agent
         }
     }
 
+    void FixedUpdate()
+    {
+        if (rb.linearVelocity.sqrMagnitude > 0.001f)
+        {
+            float targetAngle = Mathf.Atan2(rb.linearVelocity.y, rb.linearVelocity.x) * Mathf.Rad2Deg;
+            Quaternion targetRot = Quaternion.Euler(0f, 0f, targetAngle);
+            transform.rotation = Quaternion.Lerp(
+                transform.rotation,
+                targetRot,
+                turnSpeed * Time.fixedDeltaTime
+            );
+        }
+    }
+
     public override void OnEpisodeBegin()
     {
-        // Randomize agent start
-        transform.position = new Vector2(
-            Random.Range(spawnRangeX.x, spawnRangeX.y),
-            Random.Range(spawnRangeY.x, spawnRangeY.y)
-        );
+        currentHealth = maxHealth;
+        if (healthSlider != null) healthSlider.value = currentHealth;
+        lastPos = transform.position;
 
-        // Zero out any velocity
-        rb.linearVelocity = Vector2.zero;
-
-        // Randomize player start
-        if (player != null)
+        // Only randomize positions when training
+        if (Academy.Instance.IsCommunicatorOn)
         {
-            player.position = new Vector2(
+            transform.position = new Vector2(
                 Random.Range(spawnRangeX.x, spawnRangeX.y),
                 Random.Range(spawnRangeY.x, spawnRangeY.y)
             );
+            if (player != null)
+            {
+                player.position = new Vector2(
+                    Random.Range(spawnRangeX.x, spawnRangeX.y),
+                    Random.Range(spawnRangeY.x, spawnRangeY.y)
+                );
+            }
         }
 
         lastPos = transform.position;
@@ -123,7 +138,7 @@ public class ZombieAgent : Unity.MLAgents.Agent
         }
 
         // Move agent
-        rb.MovePosition(rb.position + dir * speed * Time.fixedDeltaTime);
+        rb.linearVelocity = dir * speed;
 
         Debug.Log($"Moved {dir} to {transform.position}");
 
@@ -131,7 +146,7 @@ public class ZombieAgent : Unity.MLAgents.Agent
         animator?.SetBool("isMoving", isMoving);
 
         // Flip sprite on X when moving left/right
-        if (dir.x > 0)      sr.flipX = false;
+        if (dir.x > 0) sr.flipX = false;
         else if (dir.x < 0) sr.flipX = true;
 
         // Reward by distance change
@@ -204,7 +219,7 @@ public class ZombieAgent : Unity.MLAgents.Agent
         EndEpisode();
         Destroy(gameObject);
     }
-    
+
     void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.collider.CompareTag("Player"))
@@ -217,6 +232,10 @@ public class ZombieAgent : Unity.MLAgents.Agent
             }
 
             AddReward(+0.5f);
+        }
+        if (collision.collider.CompareTag("Zombie"))
+        {
+            AddReward(-0.2f);
         }
     }
 }

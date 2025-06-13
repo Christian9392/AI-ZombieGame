@@ -9,6 +9,9 @@ public class ZombieSpawner : MonoBehaviour
     public float timeBetweenWaves = 10f;
     public int maxZombies = 50;
 
+    public float minSpawnSeparation = 3f;
+    public int maxAttemptsPerZombie = 20;
+
     public Vector2 spawnAreaMin = new Vector2(-10f, -10f);
     public Vector2 spawnAreaMax = new Vector2(10f, 10f);
 
@@ -73,52 +76,59 @@ public class ZombieSpawner : MonoBehaviour
             return;
         }
 
-        // Define spawn areas for each corner
-        Vector2 midPoint = new Vector2(
-            (spawnAreaMin.x + spawnAreaMax.x) / 2f,
-            (spawnAreaMin.y + spawnAreaMax.y) / 2f
-        );
+        var newPositions = new List<Vector2>();
+        int spawnedCount = 0;
+        int attempts = 0;
 
-        Vector2[,] corners = new Vector2[4, 2]
+        // Try to find valid, well‐spaced positions
+        while (spawnedCount < totalToSpawn && attempts < totalToSpawn * maxAttemptsPerZombie)
         {
-            { new Vector2(spawnAreaMin.x, spawnAreaMin.y), new Vector2(midPoint.x, midPoint.y) }, // 0 - Bottom-left
-            { new Vector2(spawnAreaMin.x, midPoint.y), new Vector2(midPoint.x, spawnAreaMax.y) }, // 1 - Top-left
-            { new Vector2(midPoint.x, midPoint.y), new Vector2(spawnAreaMax.x, spawnAreaMax.y) }, // 2 - Top-right
-            { new Vector2(midPoint.x, spawnAreaMin.y), new Vector2(spawnAreaMax.x, midPoint.y) }  // 3 - Bottom-right
-        };
+            attempts++;
 
-        int[] distribution = { 3, 3, 3, 3 };
-        int sum = 0;
-        foreach (int val in distribution) sum += val;
-        if (sum != totalToSpawn)
-        {
-            Debug.LogWarning("Spawn distribution doesn't match total zombies. Adjusting...");
-            distribution = new int[4];
-            for (int i = 0; i < totalToSpawn; i++)
+            // Pick a random point in the full spawn area
+            float x = Random.Range(spawnAreaMin.x, spawnAreaMax.x);
+            float y = Random.Range(spawnAreaMin.y, spawnAreaMax.y);
+            Vector2 candidate = new Vector2(x, y);
+
+            bool tooClose = false;
+
+            // Check against same‐wave positions
+            foreach (var pos in newPositions)
             {
-                distribution[i % 4]++;
+                if (Vector2.Distance(pos, candidate) < minSpawnSeparation)
+                {
+                    tooClose = true;
+                    break;
+                }
             }
+            if (tooClose) continue;
+
+            // Optionally, check against previously spawned zombies still alive
+            foreach (var go in spawnedZombies)
+            {
+                if (go != null && Vector2.Distance(go.transform.position, candidate) < minSpawnSeparation)
+                {
+                    tooClose = true;
+                    break;
+                }
+            }
+            if (tooClose) continue;
+
+            // Accept this position
+            newPositions.Add(candidate);
+            spawnedCount++;
         }
 
-        int zombiesAllowed = Mathf.Min(totalToSpawn, maxZombies - spawnedZombies.Count);
-        if (zombiesAllowed <= 0) return;
-
-        // Spawn per zone
-        for (int zone = 0; zone < 4 && zombiesAllowed > 0; zone++)
+        if (spawnedCount < totalToSpawn)
         {
-            for (int i = 0; i < distribution[zone] && zombiesAllowed > 0; i++, zombiesAllowed--)
-            {
-                Vector2 min = corners[zone, 0];
-                Vector2 max = corners[zone, 1];
+            Debug.LogWarning($"ZombieSpawner: only found {spawnedCount}/{totalToSpawn} positions after {attempts} attempts.");
+        }
 
-                Vector2 spawnPos = new Vector2(
-                    Random.Range(min.x, max.x),
-                    Random.Range(min.y, max.y)
-                );
-
-                GameObject newZombie = Instantiate(zombiePrefab, spawnPos, Quaternion.identity);
-                spawnedZombies.Add(newZombie);
-            }
+        // Instantiate new zombies at the validated positions
+        foreach (var pos in newPositions)
+        {
+            var go = Instantiate(zombiePrefab, pos, Quaternion.identity);
+            spawnedZombies.Add(go);
         }
     }
 }
