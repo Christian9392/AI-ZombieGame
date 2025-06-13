@@ -86,34 +86,47 @@ public class RoadGenerator : MonoBehaviour
         }
     }
 
-    void GenerateDrunkardRoad(Vector2Int startPos, Vector2Int initialDir, int length)
-    {
-        Vector2Int currentPos = startPos;
-        Vector2Int currentDir = initialDir;
+void GenerateDrunkardRoad(Vector2Int startPos, Vector2Int initialDir, int length)
+{
+    Vector2Int currentPos = startPos;
+    Vector2Int currentDir = initialDir;
 
-        for (int step = 0; step < length; step++)
+    int stepsRemaining = length;
+
+    while (stepsRemaining > 0)
+    {
+        int segmentLength = Random.Range(3, 10); // chunk of straight steps
+        segmentLength = Mathf.Min(segmentLength, stepsRemaining);
+
+        for (int i = 0; i < segmentLength; i++)
         {
             SetRoadTiles(currentPos, roadRadius);
-
-            float decision = Random.value;
-            if (decision > straightChance)
-            {
-                if (Random.value < 0.5f)
-                    currentDir = TurnLeft(currentDir);
-                else
-                    currentDir = TurnRight(currentDir);
-            }
-
             currentPos += currentDir;
+
+            // Clamp position to stay within bounds
             currentPos.x = Mathf.Clamp(currentPos.x, roadRadius, width - 1 - roadRadius);
             currentPos.y = Mathf.Clamp(currentPos.y, roadRadius, height - 1 - roadRadius);
 
-            if ((currentPos.x == roadRadius || currentPos.x == width - 1 - roadRadius) && currentDir.x != 0)
-                break;
-            if ((currentPos.y == roadRadius || currentPos.y == height - 1 - roadRadius) && currentDir.y != 0)
-                break;
+            stepsRemaining--;
+
+            // Early exit if we reach the edge
+            if (currentPos.x == roadRadius || currentPos.x == width - 1 - roadRadius ||
+                currentPos.y == roadRadius || currentPos.y == height - 1 - roadRadius)
+                return;
+        }
+
+        // Decide if we should turn after a segment
+        float turnChance = Random.value;
+        if (turnChance > straightChance)
+        {
+            if (Random.value < 0.5f)
+                currentDir = TurnLeft(currentDir);
+            else
+                currentDir = TurnRight(currentDir);
         }
     }
+}
+
 
     void SetRoadTiles(Vector2Int center, int radius)
 {
