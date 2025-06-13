@@ -281,26 +281,31 @@ public class RoadGeneratorV2 : MonoBehaviour
     }
 
     void RenderMap()
-    {   
-        // clear all tiles first
-        roadTilemap.ClearAllTiles();
-        roadTilemap.transform.localScale = new Vector3(mapScale, mapScale, 1f);
+{   
+    // Clear all tiles first
+    roadTilemap.ClearAllTiles();
+    roadTilemap.transform.localScale = new Vector3(mapScale, mapScale, 1f);
 
-        for (int x = 0; x < mapWidth; x++) {
-            for (int y = 0; y < mapHeight; y++) {
+    // adjust tilemap so that its in the middle of the world
+    Vector3 offset = new Vector3(mapWidth * mapScale / 2f, mapHeight * mapScale / 2f, 0f);
+    roadTilemap.transform.position = new Vector3(-offset.x, -offset.y, 0);
 
-                // Generate the tiles if 1 on map data (0 is filler)
-                Vector3Int tilePos = new Vector3Int(x, y, 0);
-                if (mapData[x, y] == 1) {
-                    int index = GetRoadTileIndex(x, y);
-                    roadTilemap.SetTile(tilePos, roadTiles[index]);
-                }
-                else {
-                    roadTilemap.SetTile(tilePos, fillerTile);
-                }
+    // Render the tiles
+    for (int x = 0; x < mapWidth; x++) {
+        for (int y = 0; y < mapHeight; y++) {
+
+            // Generate the tiles if 1 on map data (0 is filler)
+            Vector3Int tilePos = new Vector3Int(x, y, 0);
+            if (mapData[x, y] == 1) {
+                int index = GetRoadTileIndex(x, y);
+                roadTilemap.SetTile(tilePos, roadTiles[index]);
+            }
+            else {
+                roadTilemap.SetTile(tilePos, fillerTile);
             }
         }
     }
+}
 
     // Checks the current road tile (eg if its intersection, horizontal vertical etc)
     int GetRoadTileIndex(int currX, int currY)
