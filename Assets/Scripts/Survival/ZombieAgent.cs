@@ -145,10 +145,6 @@ public class ZombieAgent : Unity.MLAgents.Agent
         bool isMoving = dir != Vector2.zero;
         animator?.SetBool("isMoving", isMoving);
 
-        // Flip sprite on X when moving left/right
-        if (dir.x > 0) sr.flipX = false;
-        else if (dir.x < 0) sr.flipX = true;
-
         // Reward by distance change
         if (player != null)
         {
