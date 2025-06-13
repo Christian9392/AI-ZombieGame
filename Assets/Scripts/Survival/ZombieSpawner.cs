@@ -4,30 +4,29 @@ using TMPro;
 
 public class ZombieSpawner : MonoBehaviour
 {
+    // Controls the zombie spawning behavior
     public GameObject zombiePrefab;
     public int zombiesPerWave = 4;
     public float timeBetweenWaves = 10f;
     public int maxZombies = 50;
-
     public float minSpawnSeparation = 3f;
     public int maxAttemptsPerZombie = 20;
-
     public Vector2 spawnAreaMin = new Vector2(-10f, -10f);
     public Vector2 spawnAreaMax = new Vector2(10f, 10f);
-
     private List<GameObject> spawnedZombies = new List<GameObject>();
     private float waveTimer = 0f;
     private int currentWave = 1;
-
     public TMP_Text waveText;
     public TMP_Text countdownText;
 
+    // Initialize the spawner
     void Start()
     {
         UpdateWaveUI();
         SpawnZombies(zombiesPerWave);
     }
 
+    // Update is called once per frame
     void Update()
     {
         CleanupDestroyedZombies();
@@ -36,6 +35,7 @@ public class ZombieSpawner : MonoBehaviour
 
         UpdateCountdownUI(Mathf.Max(0, timeBetweenWaves - waveTimer));
 
+        // Spawn a new wave if the timer has reached the interval
         if (waveTimer >= timeBetweenWaves)
         {
             waveTimer = 0f;
@@ -46,6 +46,7 @@ public class ZombieSpawner : MonoBehaviour
         }
     }
 
+    // Update the UI elements for the current wave
     void UpdateWaveUI()
     {
         if (waveText != null)
@@ -54,6 +55,7 @@ public class ZombieSpawner : MonoBehaviour
         }
     }
 
+    // Update the countdown timer UI
     void UpdateCountdownUI(float secondsLeft)
     {
         if (countdownText != null)
@@ -63,11 +65,13 @@ public class ZombieSpawner : MonoBehaviour
         }
     }
 
+    // Clean up any zombies that have been destroyed
     void CleanupDestroyedZombies()
     {
         spawnedZombies.RemoveAll(z => z == null || z.Equals(null));
     }
 
+    // Spawn a specified number of zombies, ensuring they are well‐spaced
     void SpawnZombies(int totalToSpawn)
     {
         if (zombiePrefab == null)
@@ -80,19 +84,19 @@ public class ZombieSpawner : MonoBehaviour
         int spawnedCount = 0;
         int attempts = 0;
 
-        // Try to find valid, well‐spaced positions
+        // Validate spawn area
         while (spawnedCount < totalToSpawn && attempts < totalToSpawn * maxAttemptsPerZombie)
         {
             attempts++;
 
-            // Pick a random point in the full spawn area
+            // Generate a random position within the spawn area
             float x = Random.Range(spawnAreaMin.x, spawnAreaMax.x);
             float y = Random.Range(spawnAreaMin.y, spawnAreaMax.y);
             Vector2 candidate = new Vector2(x, y);
 
             bool tooClose = false;
 
-            // Check against same‐wave positions
+            // Check against already spawned positions
             foreach (var pos in newPositions)
             {
                 if (Vector2.Distance(pos, candidate) < minSpawnSeparation)
@@ -103,7 +107,7 @@ public class ZombieSpawner : MonoBehaviour
             }
             if (tooClose) continue;
 
-            // Optionally, check against previously spawned zombies still alive
+            // Check against already spawned zombies
             foreach (var go in spawnedZombies)
             {
                 if (go != null && Vector2.Distance(go.transform.position, candidate) < minSpawnSeparation)
@@ -114,7 +118,7 @@ public class ZombieSpawner : MonoBehaviour
             }
             if (tooClose) continue;
 
-            // Accept this position
+            // Add the candidate position if it passes all checks
             newPositions.Add(candidate);
             spawnedCount++;
         }
@@ -124,7 +128,7 @@ public class ZombieSpawner : MonoBehaviour
             Debug.LogWarning($"ZombieSpawner: only found {spawnedCount}/{totalToSpawn} positions after {attempts} attempts.");
         }
 
-        // Instantiate new zombies at the validated positions
+        // Instantiate zombies at the valid positions
         foreach (var pos in newPositions)
         {
             var go = Instantiate(zombiePrefab, pos, Quaternion.identity);
